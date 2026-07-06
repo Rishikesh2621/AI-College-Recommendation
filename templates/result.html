@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+{% block title %}Recommendation Dashboard | Future Growth Foundation{% endblock %}
+{% block content %}
+<section class="page-hero compact">
+  <div class="container d-flex flex-column flex-lg-row justify-content-between gap-4 align-items-lg-end">
+    <div>
+      <span class="eyebrow">Recommendation dashboard</span>
+      <h1>{{ profile.full_name }}</h1>
+      <p>{{ profile.branch }} • {{ profile.percentile }} percentile • {{ profile.category }}</p>
+    </div>
+    <div class="d-flex gap-3">
+      <a class="btn btn-light" href="{{ url_for('download_report', report_id=report_id) }}"><i class="bi bi-download me-2"></i>Download Report</a>
+      <a class="btn btn-outline-light" href="{{ url_for('dashboard') }}"><i class="bi bi-plus-circle me-2"></i>New Search</a>
+    </div>
+  </div>
+</section>
+
+<section class="section-pad bg-soft">
+  <div class="container">
+    <div class="source-note mb-4">
+      <i class="bi bi-patch-check-fill"></i>
+      <div>
+        <strong>Official CET CAP-IV data source</strong>
+        <span>Recommendations use institute-wise allotment records from the Maharashtra CET Cell for Nagpur, Amravati, Pune, Mumbai, and Nashik. Fee, placement, hostel, NAAC, and NBA data are shown only when available from the dataset.</span>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-xl-3">
+        <div class="student-card">
+          <i class="bi bi-person-vcard"></i>
+          <h2>{{ profile.full_name }}</h2>
+          <p>{{ profile.email }}</p>
+          <ul>
+            <li><span>Phone</span><b>{{ profile.phone }}</b></li>
+            <li><span>City</span><b>{{ profile.city or "Flexible" }}</b></li>
+            <li><span>Hostel</span><b>{{ profile.hostel }}</b></li>
+            <li><span>CET Score</span><b>{{ profile.percentile }} Percentile</b></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-xl-9">
+        <div class="row g-4">
+          {% for college in recommendations.top[:3] %}
+          <div class="col-md-4">
+            <div class="college-card h-100">
+              <span class="badge text-bg-primary">{{ college.chance }}</span>
+              <h3>{{ college["College Name"] }}</h3>
+              <p>{{ college.City }}, {{ college.State }}</p>
+              <div class="college-meta">
+                <span><i class="bi bi-percent"></i>{{ college.admission_probability }}%</span>
+                <span><i class="bi bi-briefcase"></i>{% if college["Placement Percentage"] > 0 %}{{ college["Placement Percentage"] }}%{% else %}—{% endif %}</span>
+                <span><i class="bi bi-cash-stack"></i>{% if college.Fees > 0 %}Rs. {{ "{:,}".format(college.Fees|int) }}{% else %}—{% endif %}</span>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-pad bg-soft pt-0">
+  <div class="container">
+    {% if recommendations.preferred_college %}
+    <div class="info-panel mb-4">
+      <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+        <div>
+          <span class="eyebrow dark">Preferred college</span>
+          <h2>{{ profile.college }}</h2>
+          <p class="text-muted mb-0">Chance is calculated by comparing your score with the official CAP-IV closing score for your selected branch and category.</p>
+        </div>
+        <div class="preferred-score">
+          <strong>{{ recommendations.preferred_college[0].chance }}</strong>
+          <span>{{ recommendations.preferred_college[0].admission_probability }}% match</span>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-end mb-4">
+      <div>
+        <span class="eyebrow dark">Preference list</span>
+        <h2 class="section-title-sm">Colleges by admission chance</h2>
+      </div>
+      <p class="text-muted mb-0 preference-help">Based on student score versus official CAP-IV closing score.</p>
+    </div>
+    <div class="row g-4">
+      {% for group_name, group_colleges in recommendations.chance_groups.items() %}
+      <div class="col-lg-4">
+        <div class="chance-group-card h-100">
+          <div class="chance-group-head">
+            <h3>{{ group_name }}</h3>
+            <span>{{ group_colleges|length }} colleges</span>
+          </div>
+          <div class="chance-list">
+            {% for college in group_colleges %}
+            <div class="chance-list-row">
+              <div>
+                <strong>{{ college["College Name"] }}</strong>
+                <span>{{ college.City }} • {{ college.Branch }}</span>
+              </div>
+              <b>{{ college["Closing Percentile"] }}</b>
+            </div>
+            {% else %}
+            <div class="chart-note">No colleges found in this chance group for the selected score, branch, category, and city.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section-pad">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="chart-box">
+          <h2>Admission Probability</h2>
+          <canvas id="probabilityChart"></canvas>
+          <div class="chart-fallback">
+            {% for label in charts.probabilities.labels %}
+            <div class="chart-data-row">
+              <span>{{ label }}</span>
+              <strong>{{ charts.probabilities.values[loop.index0] }} colleges</strong>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="chart-box">
+          <h2>Fee Comparison</h2>
+          <canvas id="feeChart"></canvas>
+          <div class="chart-fallback">
+            {% if charts.fees.has_data %}
+            {% for college in recommendations.top[:6] %}
+            <div class="chart-data-row">
+              <span>{{ college["College Name"] }}</span>
+              <strong>Rs. {{ "{:,}".format(college.Fees|int) }}</strong>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="chart-note">The official CET allotment page does not publish fee data. Use each institute's official fee notice before final admission.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="chart-box">
+          <h2>Placement Comparison</h2>
+          <canvas id="placementChart"></canvas>
+          <div class="chart-fallback">
+            {% if charts.placements.has_data %}
+            {% for college in recommendations.top[:6] %}
+            <div class="chart-data-row">
+              <span>{{ college["College Name"] }}</span>
+              <strong>{{ college["Placement Percentage"] }}%</strong>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="chart-note">The official CET allotment page does not publish placement data. This dashboard now uses official CAP-IV closing scores only.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="chart-box">
+          <h2>College Ranking</h2>
+          <canvas id="rankingChart"></canvas>
+          <div class="chart-fallback two-column">
+            {% for college in recommendations.top[:8] %}
+            <div class="ranking-row">
+              <b>{{ loop.index }}</b>
+              <span>{{ college["College Name"] }}</span>
+              <strong>{{ college.admission_probability }}%</strong>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="chart-box">
+          <h2>Branch Distribution</h2>
+          <canvas id="branchChart"></canvas>
+          <div class="chart-fallback two-column">
+            {% for label in charts.branches.labels %}
+            <div class="chart-data-row">
+              <span>{{ label }}</span>
+              <strong>{{ charts.branches.values[loop.index0] }} colleges</strong>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-pad bg-soft">
+  <div class="container">
+    <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center mb-4">
+      <div>
+        <span class="eyebrow dark">Top results</span>
+        <h2 class="section-title-sm">Recommended colleges</h2>
+      </div>
+      <div class="filter-bar" data-category="{{ profile.category }}" data-percentile="{{ profile.percentile }}">
+        <select class="form-select" data-filter="city"><option value="">City</option>{% for city in filters.cities %}<option>{{ city }}</option>{% endfor %}</select>
+        <select class="form-select" data-filter="branch"><option value="">Branch</option>{% for branch in filters.branches %}<option>{{ branch }}</option>{% endfor %}</select>
+        <select class="form-select" data-filter="naac_grade"><option value="">NAAC</option>{% for grade in filters.naac %}<option>{{ grade }}</option>{% endfor %}</select>
+        <select class="form-select" data-filter="hostel"><option value="">Hostel</option><option>Yes</option><option>No</option></select>
+      </div>
+    </div>
+    <div class="table-responsive result-table-wrap">
+      <table class="table align-middle result-table">
+        <thead>
+          <tr>
+            <th>College</th>
+            <th>City</th>
+            <th>Branch</th>
+            <th>Closing Score</th>
+            <th>Chance</th>
+            <th>Fees</th>
+            <th>Placement</th>
+            <th>Website</th>
+          </tr>
+        </thead>
+        <tbody id="collegeRows">
+          {% for college in recommendations.top %}
+          <tr>
+            <td><strong>{{ college["College Name"] }}</strong><br><small>{{ college["NAAC Grade"] }} • NBA {{ college.NBA }}</small></td>
+            <td>{{ college.City }}</td>
+            <td>{{ college.Branch }}</td>
+            <td>{{ college["Closing Percentile"] }}</td>
+            <td><span class="chance-pill">{{ college.chance }}</span></td>
+            <td>{% if college.Fees > 0 %}Rs. {{ "{:,}".format(college.Fees|int) }}{% else %}—{% endif %}</td>
+            <td>{% if college["Placement Percentage"] > 0 %}{{ college["Placement Percentage"] }}%{% else %}—{% endif %}</td>
+            <td><a href="{{ college.Website }}" target="_blank" rel="noreferrer">Visit</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section-pad">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="info-panel h-100">
+          <h2>Dream Colleges</h2>
+          {% for college in recommendations.dream %}
+            <div class="mini-college"><b>{{ college["College Name"] }}</b><span>{{ college.chance }} • closing score {{ college["Closing Percentile"] }}</span></div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="info-panel h-100">
+          <h2>Backup Colleges</h2>
+          {% for college in recommendations.backup %}
+            <div class="mini-college"><b>{{ college["College Name"] }}</b><span>{{ college.chance }} • closing score {{ college["Closing Percentile"] }}</span></div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="info-panel h-100">
+          <h2>Admission Timeline</h2>
+          {% for item in recommendations.timeline %}
+            <div class="timeline-item">{{ item }}</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-pad bg-ink text-white">
+  <div class="container">
+    <div class="ai-report">
+      <span class="eyebrow">AI counseling module</span>
+      {{ counseling_html|safe }}
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  window.COLLEGE_CHARTS = {{ charts|tojson }};
+</script>
+{% endblock %}

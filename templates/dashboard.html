@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Generate Recommendation | Future Growth Foundation{% endblock %}
+{% block content %}
+<section class="page-hero compact">
+  <div class="container">
+    <h1>Future Growth Foundation</h1>
+    <p>Complete the three short steps to receive college recommendations and a downloadable PDF report.</p>
+  </div>
+</section>
+
+<section class="section-pad">
+  <div class="container">
+    <form class="wizard-shell" method="post" action="{{ url_for('dashboard') }}" novalidate>
+      <div class="wizard-steps">
+        <button type="button" class="wizard-step active" data-step-target="0">1. Profile</button>
+        <button type="button" class="wizard-step" data-step-target="1">2. Preferences</button>
+      </div>
+
+      <div class="wizard-panel active">
+        <div class="row g-4">
+          <div class="col-md-6">{{ input("full_name", "Full Name", "text", form, errors) }}</div>
+          <div class="col-md-6">{{ input("email", "Email Address", "email", form, errors) }}</div>
+          <div class="col-md-6">{{ input("phone", "Phone Number", "tel", form, errors) }}</div>
+          <div class="col-md-6">{{ input("percentile", "CET Percentile", "number", form, errors, "0.01", "0", "100") }}</div>
+          <div class="col-md-4">{{ select("category", "Category", categories, form, errors) }}</div>
+          <div class="col-md-4">{{ select("gender", "Gender", genders, form, errors) }}</div>
+          <div class="col-md-4">{{ select("language", "Preferred Language", languages, form, errors) }}</div>
+        </div>
+      </div>
+
+      <div class="wizard-panel">
+        <div class="row g-4">
+          <div class="col-md-6">{{ input("city", "Preferred City", "text", form, errors, placeholder="e.g. Amravati, Pune, Mumbai") }}</div>
+          <div class="col-md-6">{{ select_optional("college", "Preferred College", colleges, form, errors, "Any college") }}</div>
+          <div class="col-12">{{ select("branch", "Preferred Branch", branches, form, errors) }}</div>
+          <div class="col-md-6">{{ radio("hostel", "Hostel Required", ["Yes", "No"], form, errors) }}</div>
+          <div class="col-md-6">{{ radio("scholarship", "Scholarship Required", ["Yes", "No"], form, errors) }}</div>
+          <div class="col-12">
+            <div class="review-box">
+              <i class="bi bi-shield-check"></i>
+              <div>
+                <strong>Validation is active</strong>
+                <p>Percentile must be 0-100, phone must be 10 digits, email must be valid, and mandatory fields are checked before recommendations are generated.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wizard-actions">
+        <button class="btn btn-outline-secondary" type="button" data-wizard-prev><i class="bi bi-arrow-left me-2"></i>Back</button>
+        <button class="btn btn-primary" type="button" data-wizard-next>Next<i class="bi bi-arrow-right ms-2"></i></button>
+        <button class="btn btn-success d-none" type="submit"><i class="bi bi-file-earmark-text me-2"></i>Generate Report</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% macro input(name, label, type, form, errors, step="", min="", max="", placeholder="") %}
+<label class="form-label" for="{{ name }}">{{ label }}</label>
+<input class="form-control {% if errors.get(name) %}is-invalid{% endif %}" id="{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ form.get(name, '') }}" {% if step %}step="{{ step }}"{% endif %} {% if min %}min="{{ min }}"{% endif %} {% if max %}max="{{ max }}"{% endif %} {% if placeholder %}placeholder="{{ placeholder }}"{% endif %} required>
+{% if errors.get(name) %}<div class="invalid-feedback">{{ errors[name] }}</div>{% endif %}
+{% endmacro %}
+
+{% macro select(name, label, options, form, errors) %}
+<label class="form-label" for="{{ name }}">{{ label }}</label>
+<select class="form-select {% if errors.get(name) %}is-invalid{% endif %}" id="{{ name }}" name="{{ name }}" required>
+  <option value="">Choose...</option>
+  {% for option in options %}
+    <option value="{{ option }}" {% if form.get(name) == option %}selected{% endif %}>{{ option }}</option>
+  {% endfor %}
+</select>
+{% if errors.get(name) %}<div class="invalid-feedback">{{ errors[name] }}</div>{% endif %}
+{% endmacro %}
+
+{% macro select_optional(name, label, options, form, errors, empty_label="Any") %}
+<label class="form-label" for="{{ name }}">{{ label }}</label>
+<select class="form-select {% if errors.get(name) %}is-invalid{% endif %}" id="{{ name }}" name="{{ name }}">
+  <option value="">{{ empty_label }}</option>
+  {% for option in options %}
+    <option value="{{ option }}" {% if form.get(name) == option %}selected{% endif %}>{{ option }}</option>
+  {% endfor %}
+</select>
+{% if errors.get(name) %}<div class="invalid-feedback">{{ errors[name] }}</div>{% endif %}
+{% endmacro %}
+
+{% macro radio(name, label, options, form, errors) %}
+<div class="choice-card {% if errors.get(name) %}choice-invalid{% endif %}">
+  <span class="form-label d-block">{{ label }}</span>
+  <div class="d-flex gap-3">
+    {% for option in options %}
+    <input class="btn-check" type="radio" name="{{ name }}" id="{{ name }}-{{ option }}" value="{{ option }}" {% if form.get(name) == option %}checked{% endif %} required>
+    <label class="btn btn-outline-primary flex-fill" for="{{ name }}-{{ option }}">{{ option }}</label>
+    {% endfor %}
+  </div>
+  {% if errors.get(name) %}<div class="text-danger small mt-2">{{ errors[name] }}</div>{% endif %}
+</div>
+{% endmacro %}

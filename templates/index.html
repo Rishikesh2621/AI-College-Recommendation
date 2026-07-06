@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Future Growth Foundation | AI-Based College Recommendation{% endblock %}
+{% block content %}
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <span class="eyebrow">counseling for admissions</span>
+        <h1>College Recommendation and Counseling Report Generator</h1>
+        <p class="lead">Predict suitable colleges from percentile, category, branch, city, hostel needs, and previous cutoff data. Generate a counseling report ready for admission planning.</p>
+        <div class="d-flex flex-wrap gap-3">
+          <a class="btn btn-primary btn-lg" href="{{ url_for('dashboard') }}"><i class="bi bi-stars me-2"></i>Generate Report</a>
+          <a class="btn btn-outline-light btn-lg" href="#how-it-works">How It Works</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="hero-panel">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="status-pill">Live predictor</span>
+            <i class="bi bi-graph-up-arrow text-success fs-4"></i>
+          </div>
+          <div class="mini-score">
+            <span>Admission Match</span>
+            <strong>92%</strong>
+          </div>
+          <div class="progress mb-3" role="progressbar" aria-label="Admission match">
+            <div class="progress-bar" style="width: 92%"></div>
+          </div>
+          <div class="row g-3">
+            <div class="col-6"><div class="metric-tile"><small>Top Colleges</small><b>10</b></div></div>
+            <div class="col-6"><div class="metric-tile"><small>Dream Picks</small><b>5</b></div></div>
+            <div class="col-6"><div class="metric-tile"><small>Backup Picks</small><b>5</b></div></div>
+            <div class="col-6"><div class="metric-tile"><small>PDF Report</small><b>Ready</b></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-pad bg-soft">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-3"><div class="stat-card"><i class="bi bi-building"></i><strong>{{ stats.colleges }}+</strong><span>Colleges</span></div></div>
+      <div class="col-md-3"><div class="stat-card"><i class="bi bi-database"></i><strong>{{ stats.records }}+</strong><span>Closing Score Records</span></div></div>
+      <div class="col-md-3"><div class="stat-card"><i class="bi bi-geo-alt"></i><strong>{{ stats.cities }}</strong><span>Cities</span></div></div>
+      <div class="col-md-3"><div class="stat-card"><i class="bi bi-diagram-3"></i><strong>{{ stats.branches }}</strong><span>Branches</span></div></div>
+    </div>
+  </div>
+</section>
+
+
+<section id="how-it-works" class="section-pad bg-ink text-white">
+  <div class="container">
+    <div class="section-head text-white">
+      <span class="eyebrow">How it works</span>
+      <h2>From student profile to counseling report in minutes</h2>
+    </div>
+    <div class="row g-4">
+      {% for number, title, text in [
+        ("01", "Enter profile", "Add percentile, category, branch, location, fees, hostel, and scholarship preferences."),
+        ("02", "Analyze cutoffs", "The engine compares your score with previous cutoffs and calculates admission probability."),
+        ("03", "Review dashboard", "See top, dream, and backup colleges with charts and practical counseling guidance."),
+        ("04", "Download PDF", "Save a complete counseling report for option form planning and family discussion.")
+      ] %}
+      <div class="col-md-6 col-lg-3">
+        <div class="step-card">
+          <span>{{ number }}</span>
+          <h3>{{ title }}</h3>
+          <p>{{ text }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
