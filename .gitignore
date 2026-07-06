@@ -7,3 +7,5 @@ reports/*.pdf
 uploads/*
 !uploads/.gitkeep
 !reports/.gitkeep
+.DS_Store
+**/.DS_Store
