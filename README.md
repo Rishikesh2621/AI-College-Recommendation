@@ -1,6 +1,8 @@
 # College Recommendation and Counseling Report Generator
 
-A production-ready Flask web application that recommends engineering colleges from student profile data, previous cutoff records, preferences, fees, placement metrics, and hostel or scholarship needs.
+A production-ready Flask web application that recommends engineering colleges from student profile data, previous MHT-CET cutoff records, preferences, fees, placement metrics, and hostel or scholarship needs.
+
+![Dashboard Screenshot](static/images/screenshot_dashboard.png)
 
 ## Features
 
