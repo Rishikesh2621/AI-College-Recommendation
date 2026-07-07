@@ -2,6 +2,18 @@
 
 A production-ready Flask web application that recommends engineering colleges from student profile data, previous MHT-CET cutoff records, preferences, fees, placement metrics, and hostel or scholarship needs.
 
+## The Problem Solved (For Future Growth Foundation)
+
+**Future Growth Foundation** is an educational counseling initiative that guides students toward optimal college admissions. 
+
+Previously, counselors had to **manually scroll through hundreds of pages of MHT-CET CAP round cutoff PDFs** to match a student's score, category, and preferred branches/cities with suitable institutions. This manual process was slow, labor-intensive, and prone to human oversight.
+
+**This application completely automates and solves that problem by:**
+1. **Instant Cutoff Lookup:** Automatically scanning thousands of CAP-IV allotment data rows in milliseconds.
+2. **Quality-Aware Matches:** Recommending the best possible options sorted by cutoff standards rather than safety choices.
+3. **Interactive Visualizations:** Displaying fee, placement, and probability analytics side-by-side.
+4. **Branded Report Generation:** Creating clean, print-ready PDF counseling reports containing structured tips, Parent & Authorized signatures, and custom brand letterheads instantly.
+
 ## Features
 
 - Premium landing page with responsive Bootstrap 5 UI
