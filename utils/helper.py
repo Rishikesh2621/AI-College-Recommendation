@@ -66,6 +66,8 @@ def coerce_student_profile(form) -> dict:
         "city": form.get("city", "").strip(),
         "college": form.get("college", "").strip(),
         "branch": form.get("branch", "").strip(),
+        "branch_2": form.get("branch_2", "").strip(),
+        "branch_3": form.get("branch_3", "").strip(),
         "hostel": form.get("hostel", "").strip(),
         "scholarship": form.get("scholarship", "").strip(),
     }

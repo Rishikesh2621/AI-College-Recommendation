@@ -32,7 +32,9 @@
         <div class="row g-4">
           <div class="col-md-6">{{ input("city", "Preferred City", "text", form, errors, placeholder="e.g. Amravati, Pune, Mumbai") }}</div>
           <div class="col-md-6">{{ select_optional("college", "Preferred College", colleges, form, errors, "Any college") }}</div>
-          <div class="col-12">{{ select("branch", "Preferred Branch", branches, form, errors) }}</div>
+          <div class="col-md-4">{{ select("branch", "Preferred Branch 1", branches, form, errors) }}</div>
+          <div class="col-md-4">{{ select_optional("branch_2", "Preferred Branch 2 (Optional)", branches, form, errors, "None") }}</div>
+          <div class="col-md-4">{{ select_optional("branch_3", "Preferred Branch 3 (Optional)", branches, form, errors, "None") }}</div>
           <div class="col-md-6">{{ radio("hostel", "Hostel Required", ["Yes", "No"], form, errors) }}</div>
           <div class="col-md-6">{{ radio("scholarship", "Scholarship Required", ["Yes", "No"], form, errors) }}</div>
           <div class="col-12">

@@ -37,6 +37,12 @@ def build_pdf_report(path: Path, profile: dict, recommendations: dict, counselin
     story.append(Paragraph(f"Prepared for: <b>{profile['full_name']}</b> &nbsp;&nbsp;|&nbsp;&nbsp; Date: {datetime.now().strftime('%d %B %Y')}", styles["DocMeta"]))
     story.append(Spacer(1, 0.25 * inch))
 
+    branches_str = profile["branch"]
+    if profile.get("branch_2"):
+        branches_str += f" / {profile['branch_2']}"
+    if profile.get("branch_3"):
+        branches_str += f" / {profile['branch_3']}"
+
     story.append(Paragraph("Student Information", styles["Heading"]))
     story.append(_table([
         ["Name", profile["full_name"]],
@@ -45,17 +51,23 @@ def build_pdf_report(path: Path, profile: dict, recommendations: dict, counselin
         ["Percentile", profile["percentile"]],
         ["Category", profile["category"]],
         ["Gender", profile["gender"]],
-        ["Preferred Branch", profile["branch"]],
+        ["Preferred Branch", branches_str],
         ["Preferred City", profile.get("city") or "Flexible"],
         ["Hostel Required", profile["hostel"]],
         ["Scholarship Required", profile["scholarship"]],
     ], colWidths=[150, 361]))
     story.append(Spacer(1, 0.22 * inch))
 
-    _add_recommendation_table(story, styles, "Top 10 Colleges", recommendations.get("top", []))
-    _add_recommendation_table(story, styles, "Backup Colleges", recommendations.get("backup", []))
-    for group_name, group_colleges in recommendations.get("chance_groups", {}).items():
-        _add_recommendation_table(story, styles, group_name, group_colleges[:15])
+    # Top 10 Recommended Colleges (Combined)
+    _add_recommendation_table(story, styles, "Top Recommended Colleges (Combined)", recommendations.get("top", []))
+    story.append(Spacer(1, 0.15 * inch))
+
+    # Branch-wise recommendations
+    for br, br_recs in recommendations.get("by_branch", {}).items():
+        for group_name, group_colleges in br_recs.get("chance_groups", {}).items():
+            if group_colleges:
+                _add_recommendation_table(story, styles, f"{group_name} — {br}", group_colleges[:10])
+                story.append(Spacer(1, 0.05 * inch))
 
     story.append(Spacer(1, 0.22 * inch))
     story.append(Paragraph("Scholarships", styles["Heading"]))

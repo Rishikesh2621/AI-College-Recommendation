@@ -21,11 +21,10 @@ class CollegeRecommendationEngine:
         with self.scholarships_path.open(newline="", encoding="utf-8") as file:
             return list(csv.DictReader(file))
 
-    def recommend(self, profile: dict) -> dict:
+    def _recommend_for_branch(self, profile: dict, branch: str) -> dict:
         percentile = float(profile["percentile"])
         city_input = profile.get("city", "").strip()
         preferred_cities = [c.strip().lower() for c in city_input.split(",") if c.strip()]
-        branch = profile.get("branch", "")
         category = profile.get("category", "")
         rows = self.load_colleges()
         # Filter by Category and Branch, but keep all cities
@@ -135,7 +134,62 @@ class CollegeRecommendationEngine:
             "dream": dream or sorted(deduped_scored, key=lambda item: (city_priority_asc(item["City"]), item["Closing Percentile"]))[:5],
             "backup": backup or sorted(deduped_scored, key=lambda item: (city_priority_asc(item["City"]), item["Closing Percentile"]))[:5],
             "chance_groups": self._chance_groups(all_preferences, city_input),
-            "preferred_college": self._preferred_college_matches(profile, percentile),
+            "preferred_college": self._preferred_college_matches(profile, percentile, branch),
+        }
+
+    def recommend(self, profile: dict) -> dict:
+        selected_branches = [profile.get("branch")]
+        if profile.get("branch_2"):
+            selected_branches.append(profile.get("branch_2"))
+        if profile.get("branch_3"):
+            selected_branches.append(profile.get("branch_3"))
+        
+        selected_branches = [b for b in selected_branches if b]
+
+        by_branch = {}
+        for br in selected_branches:
+            by_branch[br] = self._recommend_for_branch(profile, br)
+        
+        primary_branch = selected_branches[0]
+        primary_recs = by_branch[primary_branch]
+        
+        # Combined top list for overall metrics
+        combined_top = []
+        seen_colleges = set()
+        for br in selected_branches:
+            for item in by_branch[br]["top"]:
+                key = (item["College Name"], item["Branch"])
+                if key not in seen_colleges:
+                    seen_colleges.add(key)
+                    combined_top.append(item)
+        
+        city_input = profile.get("city", "").strip()
+        preferred_cities = [c.strip().lower() for c in city_input.split(",") if c.strip()]
+        
+        def city_priority(item_city):
+            if not preferred_cities:
+                return 0
+            item_city_lower = item_city.lower()
+            if item_city_lower in preferred_cities:
+                return len(preferred_cities) - preferred_cities.index(item_city_lower)
+            return 0
+
+        combined_top = sorted(
+            combined_top,
+            key=lambda item: (
+                city_priority(item["City"]),
+                item["Closing Percentile"],
+            ),
+            reverse=True,
+        )[:10]
+
+        return {
+            "by_branch": by_branch,
+            "top": combined_top,
+            "dream": primary_recs["dream"],
+            "backup": primary_recs["backup"],
+            "chance_groups": primary_recs["chance_groups"],
+            "preferred_college": primary_recs["preferred_college"],
             "scholarships": self.match_scholarships(profile),
             "timeline": self.admission_timeline(),
         }
@@ -269,11 +323,10 @@ Submit a balanced preference list with dream, realistic, and backup colleges. Re
         normalized["Fees"] = int(normalized["Fees"])
         return normalized
 
-    def _preferred_college_matches(self, profile: dict, percentile: float) -> list[dict]:
+    def _preferred_college_matches(self, profile: dict, percentile: float, branch: str) -> list[dict]:
         college_name = profile.get("college", "").strip()
         if not college_name:
             return []
-        branch = profile.get("branch", "")
         category = profile.get("category", "")
         college_rows = [college for college in self.load_colleges() if college["College Name"] == college_name]
         if category:
