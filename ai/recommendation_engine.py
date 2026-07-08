@@ -27,29 +27,15 @@ class CollegeRecommendationEngine:
         preferred_cities = [c.strip().lower() for c in city_input.split(",") if c.strip()]
         category = profile.get("category", "")
         rows = self.load_colleges()
-        # Filter by Category and Branch, but keep all cities
-        # so we can prioritize the preferred city and suggest other cities below it.
-        filtered = [
-            college
-            for college in rows
-            if college["Category"] == category
-            and college["Branch"] == branch
-        ]
-
-        if len(filtered) < 10:
-            filtered = [
-                college
-                for college in rows
-                if college["Category"] == category
-            ]
-        if len(filtered) < 10:
-            filtered = [
-                college
-                for college in rows
-                if college["Branch"] == branch
-            ]
-        if len(filtered) < 10:
-            filtered = rows
+        # Filter strictly by the selected branch
+        branch_rows = [c for c in rows if c["Branch"] == branch]
+        
+        # Filter by category within this branch
+        filtered = [c for c in branch_rows if c["Category"] == category]
+        
+        # Fallback to General category of the same branch if no colleges matched the specific category
+        if not filtered and category != "General":
+            filtered = [c for c in branch_rows if c["Category"] == "General"]
 
         scored = [self._score(college, percentile) for college in filtered]
         
