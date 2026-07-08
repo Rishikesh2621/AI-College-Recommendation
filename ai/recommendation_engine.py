@@ -217,6 +217,12 @@ class CollegeRecommendationEngine:
                 results.append(self._score(college, percentile))
             else:
                 results.append(college)
+
+        if percentile is not None:
+            results = sorted(results, key=lambda x: x["Closing Percentile"], reverse=True)
+        else:
+            results = sorted(results, key=lambda x: float(x.get("Closing Percentile", 0) or 0), reverse=True)
+
         return results[:50]
 
     def chart_payload(self, recommendations: dict) -> dict:
