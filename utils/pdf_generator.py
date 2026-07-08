@@ -53,8 +53,6 @@ def build_pdf_report(path: Path, profile: dict, recommendations: dict, counselin
         ["Gender", profile["gender"]],
         ["Preferred Branch", branches_str],
         ["Preferred City", profile.get("city") or "Flexible"],
-        ["Hostel Required", profile["hostel"]],
-        ["Scholarship Required", profile["scholarship"]],
     ], colWidths=[150, 361]))
     story.append(Spacer(1, 0.22 * inch))
 

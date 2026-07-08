@@ -68,8 +68,8 @@ def coerce_student_profile(form) -> dict:
         "branch": form.get("branch", "").strip(),
         "branch_2": form.get("branch_2", "").strip(),
         "branch_3": form.get("branch_3", "").strip(),
-        "hostel": form.get("hostel", "").strip(),
-        "scholarship": form.get("scholarship", "").strip(),
+        "hostel": form.get("hostel", "No").strip() or "No",
+        "scholarship": form.get("scholarship", "No").strip() or "No",
     }
 
 
@@ -84,8 +84,6 @@ def validate_student_profile(profile: dict) -> dict:
         "gender": "Gender is required.",
         "language": "Preferred language is required.",
         "branch": "Preferred branch is required.",
-        "hostel": "Please select whether hostel is required.",
-        "scholarship": "Please select whether scholarship is required.",
     }
 
     for key, message in required.items():
@@ -111,10 +109,6 @@ def validate_student_profile(profile: dict) -> dict:
         errors["gender"] = "Choose a valid gender."
     if profile.get("language") and profile["language"] not in LANGUAGES:
         errors["language"] = "Choose a valid language."
-    if profile.get("hostel") and profile["hostel"] not in YES_NO:
-        errors["hostel"] = "Choose Yes or No."
-    if profile.get("scholarship") and profile["scholarship"] not in YES_NO:
-        errors["scholarship"] = "Choose Yes or No."
 
     return errors
 
