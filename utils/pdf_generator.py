@@ -49,7 +49,7 @@ def build_pdf_report(path: Path, profile: dict, recommendations: dict, counselin
         ["Email", profile["email"]],
         ["Phone", profile["phone"]],
         ["Percentile", profile["percentile"]],
-        ["Category", profile["category"]],
+        ["Caste Category", profile["category"]],
         ["Gender", profile["gender"]],
         ["Preferred Branch", branches_str],
         ["Preferred City", profile.get("city") or "Flexible"],
