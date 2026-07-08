@@ -69,23 +69,6 @@ def build_pdf_report(path: Path, profile: dict, recommendations: dict, counselin
                 _add_recommendation_table(story, styles, f"{group_name} — {br}", group_colleges[:10])
                 story.append(Spacer(1, 0.05 * inch))
 
-    story.append(Spacer(1, 0.22 * inch))
-    story.append(Paragraph("Scholarships", styles["Heading"]))
-    scholarships = [
-        item for item in recommendations.get("scholarships", [])
-        if item["Scholarship Name"] not in ["Women in Engineering Grant", "Hostel Assistance Scheme"]
-    ]
-    if scholarships:
-        scholarship_rows = [["Scholarship", "Benefit", "Eligibility"]]
-        for item in scholarships:
-            scholarship_rows.append([
-                item["Scholarship Name"],
-                item["Benefit"],
-                item["Eligibility"],
-            ])
-        story.append(_table(scholarship_rows, header=True, colWidths=[161, 150, 200]))
-    else:
-        story.append(Paragraph("No automatic scholarship match was found. Check state, institute, category, and merit schemes before admission confirmation.", styles["Body"]))
 
     story.append(PageBreak())
     story.append(Paragraph("Counseling Recommendation", styles["Heading"]))
