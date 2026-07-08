@@ -18,6 +18,7 @@ CATEGORIES = [
     "General",
     "MI",
     "MI-AI",
+    "MI-MH",
     "NT1",
     "NT2",
     "NT3",

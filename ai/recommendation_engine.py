@@ -26,6 +26,8 @@ class CollegeRecommendationEngine:
         city_input = profile.get("city", "").strip()
         preferred_cities = [c.strip().lower() for c in city_input.split(",") if c.strip()]
         category = profile.get("category", "")
+        if category == "MI-MH":
+            category = "MI"
         rows = self.load_colleges()
         # Filter strictly by the selected branch
         branch_rows = [c for c in rows if c["Branch"] == branch]
@@ -183,8 +185,11 @@ class CollegeRecommendationEngine:
     def search(self, filters: dict, percentile: float | None = None) -> list[dict]:
         rows = self.load_colleges()
         results = []
+        category_filter = filters.get("category", "")
+        if category_filter == "MI-MH":
+            category_filter = "MI"
         for college in rows:
-            if filters.get("category") and college["Category"] != filters["category"]:
+            if category_filter and college["Category"] != category_filter:
                 continue
             if filters.get("city") and college["City"] != filters["city"]:
                 continue
