@@ -71,7 +71,10 @@ def build_pdf_report(path: Path, profile: dict, recommendations: dict, counselin
 
     story.append(Spacer(1, 0.22 * inch))
     story.append(Paragraph("Scholarships", styles["Heading"]))
-    scholarships = recommendations.get("scholarships", [])
+    scholarships = [
+        item for item in recommendations.get("scholarships", [])
+        if item["Scholarship Name"] not in ["Women in Engineering Grant", "Hostel Assistance Scheme"]
+    ]
     if scholarships:
         scholarship_rows = [["Scholarship", "Benefit", "Eligibility"]]
         for item in scholarships:
