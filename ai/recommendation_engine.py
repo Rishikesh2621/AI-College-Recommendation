@@ -56,6 +56,14 @@ class CollegeRecommendationEngine:
                 seen_colleges.add(key)
                 deduped_scored.append(item)
         
+        if preferred_cities:
+            matched = [
+                c for c in deduped_scored
+                if any(pc in c["City"].lower() for pc in preferred_cities)
+            ]
+            if matched:
+                deduped_scored = matched
+        
         def city_priority(item_city):
             if not preferred_cities:
                 return 0
