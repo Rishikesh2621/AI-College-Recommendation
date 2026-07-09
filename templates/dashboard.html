@@ -32,9 +32,29 @@
         <div class="row g-4">
           <div class="col-md-6">{{ input("city", "Preferred City", "text", form, errors, placeholder="e.g. Amravati, Pune, Mumbai") }}</div>
           <div class="col-md-6">{{ select_optional("college", "Preferred College", colleges, form, errors, "Any college") }}</div>
-          <div class="col-md-4">{{ select("branch", "Preferred Branch 1", branches, form, errors) }}</div>
-          <div class="col-md-4">{{ select_optional("branch_2", "Preferred Branch 2 (Optional)", branches, form, errors, "None") }}</div>
-          <div class="col-md-4">{{ select_optional("branch_3", "Preferred Branch 3 (Optional)", branches, form, errors, "None") }}</div>
+          <div class="col-12">
+            <label class="form-label">Preferred Branches (Select up to 6)</label>
+            <div class="multiselect-container {% if errors.get('branches') %}is-invalid-container{% endif %}" id="branchesMultiselect">
+              <div class="multiselect-selected" id="multiselectSelected">
+                <!-- Selected chips will be rendered here dynamically -->
+                <input type="text" class="multiselect-search-input" id="multiselectSearch" placeholder="Search and select branches..." autocomplete="off">
+              </div>
+              <div class="multiselect-dropdown" id="multiselectDropdown">
+                {% for option in branches %}
+                  <div class="multiselect-option" data-value="{{ option }}">{{ option }}</div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="text-danger small mt-1 d-none" id="multiselectError">You can select a maximum of 6 branches only.</div>
+            {% if errors.get('branches') %}
+              <div class="text-danger small mt-1">{{ errors['branches'] }}</div>
+            {% endif %}
+            <div id="hiddenBranchesInputs">
+              {% for val in form.get('branches', []) %}
+                <input type="hidden" name="branches" value="{{ val }}">
+              {% endfor %}
+            </div>
+          </div>
           <div class="col-12">
             <div class="review-box">
               <i class="bi bi-shield-check"></i>

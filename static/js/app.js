@@ -23,6 +23,149 @@
   if (prevButton) prevButton.addEventListener("click", () => showStep(currentStep - 1));
   showStep(0);
 
+  // Searchable Multi-Select Branches Logic
+  const multiselect = document.getElementById("branchesMultiselect");
+  if (multiselect) {
+    const searchInput = document.getElementById("multiselectSearch");
+    const dropdown = document.getElementById("multiselectDropdown");
+    const selectedContainer = document.getElementById("multiselectSelected");
+    const errorMsg = document.getElementById("multiselectError");
+    const hiddenContainer = document.getElementById("hiddenBranchesInputs");
+    const options = Array.from(dropdown.querySelectorAll(".multiselect-option"));
+
+    let selectedValues = [];
+
+    // Helper to render a chip
+    function renderChip(value) {
+      const chip = document.createElement("div");
+      chip.className = "multiselect-chip";
+      chip.dataset.value = value;
+      
+      const span = document.createElement("span");
+      span.textContent = value;
+      
+      const removeBtn = document.createElement("span");
+      removeBtn.className = "remove-chip";
+      removeBtn.innerHTML = "&times;";
+      removeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        removeValue(value);
+      });
+
+      chip.appendChild(span);
+      chip.appendChild(removeBtn);
+      
+      selectedContainer.insertBefore(chip, searchInput);
+    }
+
+    // Add selected value
+    function addValue(value) {
+      if (selectedValues.includes(value)) return;
+      if (selectedValues.length >= 6) {
+        if (errorMsg) errorMsg.classList.remove("d-none");
+        return;
+      }
+      if (errorMsg) errorMsg.classList.add("d-none");
+
+      selectedValues.push(value);
+      renderChip(value);
+
+      // Create hidden input
+      const hiddenInput = document.createElement("input");
+      hiddenInput.type = "hidden";
+      hiddenInput.name = "branches";
+      hiddenInput.value = value;
+      hiddenInput.dataset.value = value;
+      hiddenContainer.appendChild(hiddenInput);
+
+      // Update option styles
+      const optionEl = options.find(opt => opt.dataset.value === value);
+      if (optionEl) optionEl.classList.add("selected");
+
+      searchInput.value = "";
+      filterOptions("");
+    }
+
+    // Remove selected value
+    function removeValue(value) {
+      selectedValues = selectedValues.filter(val => val !== value);
+      
+      // Remove chip
+      const chip = selectedContainer.querySelector(`.multiselect-chip[data-value="${CSS.escape(value)}"]`);
+      if (chip) chip.remove();
+
+      // Remove hidden input
+      const hiddenInput = hiddenContainer.querySelector(`input[data-value="${CSS.escape(value)}"]`) ||
+                          hiddenContainer.querySelector(`input[value="${CSS.escape(value)}"]`);
+      if (hiddenInput) hiddenInput.remove();
+
+      // Update option styles
+      const optionEl = options.find(opt => opt.dataset.value === value);
+      if (optionEl) optionEl.classList.remove("selected");
+
+      // Hide error if below limit
+      if (selectedValues.length < 6 && errorMsg) {
+        errorMsg.classList.add("d-none");
+      }
+    }
+
+    // Filter options list
+    function filterOptions(query) {
+      const lowerQuery = query.toLowerCase().trim();
+      options.forEach(option => {
+        const text = option.textContent.toLowerCase();
+        const matchesQuery = text.includes(lowerQuery);
+        if (matchesQuery) {
+          option.style.display = "";
+        } else {
+          option.style.display = "none";
+        }
+      });
+    }
+
+    // Initialize from pre-filled server inputs (e.g. on validation error reload)
+    const initialInputs = Array.from(hiddenContainer.querySelectorAll("input[name='branches']"));
+    initialInputs.forEach(input => {
+      input.dataset.value = input.value;
+      addValue(input.value);
+    });
+
+    // Event Listeners
+    multiselect.addEventListener("click", () => {
+      searchInput.focus();
+    });
+
+    searchInput.addEventListener("focus", () => {
+      dropdown.classList.add("show");
+    });
+
+    searchInput.addEventListener("input", (e) => {
+      filterOptions(e.target.value);
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!multiselect.contains(e.target)) {
+        dropdown.classList.remove("show");
+      }
+    });
+
+    // Handle option click
+    options.forEach(option => {
+      option.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const value = option.dataset.value;
+        if (selectedValues.includes(value)) {
+          removeValue(value);
+        } else {
+          addValue(value);
+        }
+        searchInput.focus();
+      });
+    });
+  }
+
+
   function chart(id, config) {
     const element = document.getElementById(id);
     if (!element || typeof Chart === "undefined") return;

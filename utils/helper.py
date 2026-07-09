@@ -56,6 +56,20 @@ YES_NO = ["Yes", "No"]
 
 
 def coerce_student_profile(form) -> dict:
+    branches = []
+    if hasattr(form, "getlist"):
+        branches = [b.strip() for b in form.getlist("branches") if b.strip()]
+    else:
+        val = form.get("branches")
+        if isinstance(val, list):
+            branches = [b.strip() for b in val if b.strip()]
+        elif isinstance(val, str):
+            branches = [b.strip() for b in val.split(",") if b.strip()]
+            
+    # Backwards compatibility fallback if only single branch is provided
+    if not branches and form.get("branch"):
+        branches = [form.get("branch").strip()]
+
     return {
         "full_name": form.get("full_name", "").strip(),
         "email": form.get("email", "").strip().lower(),
@@ -66,9 +80,8 @@ def coerce_student_profile(form) -> dict:
         "language": form.get("language", "").strip(),
         "city": form.get("city", "").strip(),
         "college": form.get("college", "").strip(),
-        "branch": form.get("branch", "").strip(),
-        "branch_2": form.get("branch_2", "").strip(),
-        "branch_3": form.get("branch_3", "").strip(),
+        "branches": branches,
+        "branch": branches[0] if branches else "",
         "hostel": form.get("hostel", "No").strip() or "No",
         "scholarship": form.get("scholarship", "No").strip() or "No",
     }
@@ -84,12 +97,19 @@ def validate_student_profile(profile: dict) -> dict:
         "category": "Category is required.",
         "gender": "Gender is required.",
         "language": "Preferred language is required.",
-        "branch": "Preferred branch is required.",
     }
 
     for key, message in required.items():
         if not profile.get(key):
             errors[key] = message
+
+    # Validate branches list
+    branches = profile.get("branches", [])
+    if not branches:
+        errors["branches"] = "Preferred branch is required."
+    elif len(branches) > 6:
+        errors["branches"] = "You can select a maximum of 6 branches only."
+
 
     if profile.get("email") and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", profile["email"]):
         errors["email"] = "Enter a valid email address."

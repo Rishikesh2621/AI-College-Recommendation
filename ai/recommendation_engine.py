@@ -126,11 +126,13 @@ class CollegeRecommendationEngine:
         }
 
     def recommend(self, profile: dict) -> dict:
-        selected_branches = [profile.get("branch")]
-        if profile.get("branch_2"):
-            selected_branches.append(profile.get("branch_2"))
-        if profile.get("branch_3"):
-            selected_branches.append(profile.get("branch_3"))
+        selected_branches = profile.get("branches", [])
+        if not selected_branches:
+            selected_branches = [profile.get("branch")]
+            if profile.get("branch_2"):
+                selected_branches.append(profile.get("branch_2"))
+            if profile.get("branch_3"):
+                selected_branches.append(profile.get("branch_3"))
         
         selected_branches = [b for b in selected_branches if b]
 
