@@ -34,17 +34,13 @@
           <div class="col-md-6">{{ select_optional("college", "Preferred College", colleges, form, errors, "Any college") }}</div>
           <div class="col-12">
             <label class="form-label">Preferred Branches (Select up to 6)</label>
-            <div class="border rounded p-3 bg-light scrollable-branch-box" style="max-height: 220px; overflow-y: auto; border-color: #cbd5e1 !important;">
-              <div class="row g-2">
-                {% for option in branches %}
-                <div class="col-md-6">
-                  <div class="form-check">
-                    <input class="form-check-input branch-checkbox" type="checkbox" name="branches" id="branch-{{ loop.index }}" value="{{ option }}" {% if option in form.get('branches', []) or (not form.get('branches') and form.get('branch') == option) %}checked{% endif %}>
-                    <label class="form-check-label" for="branch-{{ loop.index }}" style="font-weight: 500; font-size: 0.92rem; color: #334155;">{{ option }}</label>
-                  </div>
-                </div>
-                {% endfor %}
+            <div class="border rounded p-3 bg-light scrollable-branch-box" style="max-height: 350px; overflow-y: auto; border-color: #cbd5e1 !important;">
+              {% for option in branches %}
+              <div class="form-check mb-2">
+                <input class="form-check-input branch-checkbox" type="checkbox" name="branches" id="branch-{{ loop.index }}" value="{{ option }}" {% if option in form.get('branches', []) or (not form.get('branches') and form.get('branch') == option) %}checked{% endif %}>
+                <label class="form-check-label" for="branch-{{ loop.index }}" style="font-weight: 500; font-size: 0.92rem; color: #334155;">{{ option }}</label>
               </div>
+              {% endfor %}
             </div>
             <div class="small text-danger mt-1 d-none" id="branchLimitWarning">You can select a maximum of 6 branches.</div>
             {% if errors.get('branches') %}<div class="text-danger small mt-1">{{ errors['branches'] }}</div>{% endif %}
