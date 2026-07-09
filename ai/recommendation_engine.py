@@ -9,17 +9,23 @@ class CollegeRecommendationEngine:
     def __init__(self, colleges_path: Path, scholarships_path: Path):
         self.colleges_path = colleges_path
         self.scholarships_path = scholarships_path
+        self._colleges = None
+        self._scholarships = None
 
     def load_colleges(self) -> list[dict]:
-        with self.colleges_path.open(newline="", encoding="utf-8") as file:
-            rows = list(csv.DictReader(file))
-        return [self._normalize(row) for row in rows]
+        if self._colleges is None:
+            with self.colleges_path.open(newline="", encoding="utf-8") as file:
+                rows = list(csv.DictReader(file))
+            self._colleges = [self._normalize(row) for row in rows]
+        return self._colleges
 
     def load_scholarships(self) -> list[dict]:
-        if not self.scholarships_path.exists():
-            return []
-        with self.scholarships_path.open(newline="", encoding="utf-8") as file:
-            return list(csv.DictReader(file))
+        if self._scholarships is None:
+            if not self.scholarships_path.exists():
+                return []
+            with self.scholarships_path.open(newline="", encoding="utf-8") as file:
+                self._scholarships = list(csv.DictReader(file))
+        return self._scholarships
 
     def _recommend_for_branch(self, profile: dict, branch: str) -> dict:
         percentile = float(profile["percentile"])
@@ -126,13 +132,11 @@ class CollegeRecommendationEngine:
         }
 
     def recommend(self, profile: dict) -> dict:
-        selected_branches = profile.get("branches", [])
-        if not selected_branches:
-            selected_branches = [profile.get("branch")]
-            if profile.get("branch_2"):
-                selected_branches.append(profile.get("branch_2"))
-            if profile.get("branch_3"):
-                selected_branches.append(profile.get("branch_3"))
+        selected_branches = [profile.get("branch")]
+        if profile.get("branch_2"):
+            selected_branches.append(profile.get("branch_2"))
+        if profile.get("branch_3"):
+            selected_branches.append(profile.get("branch_3"))
         
         selected_branches = [b for b in selected_branches if b]
 
