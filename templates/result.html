@@ -215,8 +215,6 @@
       <div class="filter-bar" data-category="{{ profile.category }}" data-percentile="{{ profile.percentile }}">
         <select class="form-select" data-filter="city"><option value="">City</option>{% for city in filters.cities %}<option>{{ city }}</option>{% endfor %}</select>
         <select class="form-select" data-filter="branch"><option value="">Branch</option>{% for branch in filters.branches %}<option>{{ branch }}</option>{% endfor %}</select>
-        <select class="form-select" data-filter="naac_grade"><option value="">NAAC</option>{% for grade in filters.naac %}<option>{{ grade }}</option>{% endfor %}</select>
-        <select class="form-select" data-filter="hostel"><option value="">Hostel</option><option>Yes</option><option>No</option></select>
       </div>
     </div>
     <div class="table-responsive result-table-wrap">
