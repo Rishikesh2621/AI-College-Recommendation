@@ -132,11 +132,9 @@ class CollegeRecommendationEngine:
         }
 
     def recommend(self, profile: dict) -> dict:
-        selected_branches = [profile.get("branch")]
-        if profile.get("branch_2"):
-            selected_branches.append(profile.get("branch_2"))
-        if profile.get("branch_3"):
-            selected_branches.append(profile.get("branch_3"))
+        selected_branches = profile.get("branches") or []
+        if not selected_branches and profile.get("branch"):
+            selected_branches = [profile.get("branch")]
         
         selected_branches = [b for b in selected_branches if b]
 
@@ -144,8 +142,10 @@ class CollegeRecommendationEngine:
         for br in selected_branches:
             by_branch[br] = self._recommend_for_branch(profile, br)
         
-        primary_branch = selected_branches[0]
-        primary_recs = by_branch[primary_branch]
+        primary_branch = selected_branches[0] if selected_branches else ""
+        primary_recs = by_branch.get(primary_branch) or {
+            "top": [], "dream": [], "backup": [], "chance_groups": {}, "preferred_college": []
+        }
         
         # Combined top list for overall metrics
         combined_top = []
@@ -175,7 +175,7 @@ class CollegeRecommendationEngine:
                 item["Closing Percentile"],
             ),
             reverse=True,
-        )[:10]
+        )[:15]
 
         return {
             "by_branch": by_branch,
@@ -272,9 +272,10 @@ class CollegeRecommendationEngine:
         top = recommendations.get("top", [])
         best = top[0] if top else {}
         scholarship_names = ", ".join(item["Scholarship Name"] for item in recommendations.get("scholarships", []))
+        branches_str = " / ".join(profile.get("branches") or [])
         return f"""
 ## Student Profile Summary
-{profile["full_name"]} has scored {profile["percentile"]} percentile and is targeting {profile["branch"]} colleges under the {profile["category"]} category.
+{profile["full_name"]} has scored {profile["percentile"]} percentile and is targeting {branches_str} colleges under the {profile["category"]} category.
 
 ## Academic Strength
 The score indicates a strong profile for practical counseling choices. Colleges with cutoffs within 2 percentile points should be treated as realistic options.
@@ -283,7 +284,7 @@ The score indicates a strong profile for practical counseling choices. Colleges 
 The strongest current match is **{best.get("College Name", "a suitable listed college")}** with an estimated {best.get("chance", "Medium")} admission chance.
 
 ## Branch Analysis
-{profile["branch"]} remains placement-oriented, with strong opportunities in software, analytics, automation, and product engineering roles.
+The selected branches ({branches_str}) remain placement-oriented, with strong opportunities in software, analytics, automation, and product engineering roles.
 
 ## Backup Options
 Keep at least five lower-cutoff colleges in the option form to protect against cutoff movement.

@@ -56,6 +56,20 @@ YES_NO = ["Yes", "No"]
 
 
 def coerce_student_profile(form) -> dict:
+    branches = []
+    if hasattr(form, "getlist"):
+        branches = form.getlist("branches")
+    
+    if not branches:
+        branches = form.get("branches") or []
+        if isinstance(branches, str):
+            branches = [branches]
+    
+    if not branches and form.get("branch"):
+        branches = [form.get("branch")]
+
+    branches = [b.strip() for b in branches if b.strip()]
+
     return {
         "full_name": form.get("full_name", "").strip(),
         "email": form.get("email", "").strip().lower(),
@@ -66,9 +80,7 @@ def coerce_student_profile(form) -> dict:
         "language": form.get("language", "").strip(),
         "city": form.get("city", "").strip(),
         "college": form.get("college", "").strip(),
-        "branch": form.get("branch", "").strip(),
-        "branch_2": form.get("branch_2", "").strip(),
-        "branch_3": form.get("branch_3", "").strip(),
+        "branches": branches,
         "hostel": form.get("hostel", "No").strip() or "No",
         "scholarship": form.get("scholarship", "No").strip() or "No",
     }
@@ -84,12 +96,16 @@ def validate_student_profile(profile: dict) -> dict:
         "category": "Category is required.",
         "gender": "Gender is required.",
         "language": "Preferred language is required.",
-        "branch": "Preferred branch is required.",
     }
 
     for key, message in required.items():
         if not profile.get(key):
             errors[key] = message
+
+    if not profile.get("branches"):
+        errors["branches"] = "Preferred branch is required."
+    elif len(profile["branches"]) > 6:
+        errors["branches"] = "Select a maximum of 6 branches."
 
     if profile.get("email") and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", profile["email"]):
         errors["email"] = "Enter a valid email address."

@@ -32,9 +32,23 @@
         <div class="row g-4">
           <div class="col-md-6">{{ input("city", "Preferred City", "text", form, errors, placeholder="e.g. Amravati, Pune, Mumbai") }}</div>
           <div class="col-md-6">{{ select_optional("college", "Preferred College", colleges, form, errors, "Any college") }}</div>
-          <div class="col-md-4">{{ select("branch", "Preferred Branch 1", branches, form, errors) }}</div>
-          <div class="col-md-4">{{ select_optional("branch_2", "Preferred Branch 2 (Optional)", branches, form, errors, "None") }}</div>
-          <div class="col-md-4">{{ select_optional("branch_3", "Preferred Branch 3 (Optional)", branches, form, errors, "None") }}</div>
+          <div class="col-12">
+            <label class="form-label">Preferred Branches (Select up to 6)</label>
+            <div class="border rounded p-3 bg-light scrollable-branch-box" style="max-height: 220px; overflow-y: auto; border-color: #cbd5e1 !important;">
+              <div class="row g-2">
+                {% for option in branches %}
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input class="form-check-input branch-checkbox" type="checkbox" name="branches" id="branch-{{ loop.index }}" value="{{ option }}" {% if option in form.get('branches', []) or (not form.get('branches') and form.get('branch') == option) %}checked{% endif %}>
+                    <label class="form-check-label" for="branch-{{ loop.index }}" style="font-weight: 500; font-size: 0.92rem; color: #334155;">{{ option }}</label>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="small text-danger mt-1 d-none" id="branchLimitWarning">You can select a maximum of 6 branches.</div>
+            {% if errors.get('branches') %}<div class="text-danger small mt-1">{{ errors['branches'] }}</div>{% endif %}
+          </div>
           <div class="col-12">
             <div class="review-box">
               <i class="bi bi-shield-check"></i>
@@ -97,3 +111,24 @@
   {% if errors.get(name) %}<div class="text-danger small mt-2">{{ errors[name] }}</div>{% endif %}
 </div>
 {% endmacro %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const checkboxes = document.querySelectorAll(".branch-checkbox");
+  const warning = document.getElementById("branchLimitWarning");
+  
+  checkboxes.forEach(cb => {
+    cb.addEventListener("change", function() {
+      const checkedCount = document.querySelectorAll(".branch-checkbox:checked").length;
+      if (checkedCount > 6) {
+        this.checked = false;
+        warning.classList.remove("d-none");
+      } else {
+        warning.classList.add("d-none");
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

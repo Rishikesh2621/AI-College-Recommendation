@@ -16,7 +16,7 @@ Student profile:
 - Preferred language: {profile.get("language")}
 - City preference: {profile.get("city")}
 - College preference: {profile.get("college")}
-- Branch preference: {profile.get("branch")}
+- Preferred branches: {", ".join(profile.get("branches") or [])}
 - Hostel required: {profile.get("hostel")}
 - Scholarship required: {profile.get("scholarship")}
 

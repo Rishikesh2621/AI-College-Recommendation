@@ -37,11 +37,10 @@ def build_pdf_report(path: Path, profile: dict, recommendations: dict, counselin
     story.append(Paragraph(f"Prepared for: <b>{profile['full_name']}</b> &nbsp;&nbsp;|&nbsp;&nbsp; Date: {datetime.now().strftime('%d %B %Y')}", styles["DocMeta"]))
     story.append(Spacer(1, 0.25 * inch))
 
-    branches_str = profile["branch"]
-    if profile.get("branch_2"):
-        branches_str += f" / {profile['branch_2']}"
-    if profile.get("branch_3"):
-        branches_str += f" / {profile['branch_3']}"
+    branches = profile.get("branches") or []
+    if not branches and profile.get("branch"):
+        branches = [profile["branch"]]
+    branches_str = " / ".join(branches)
 
     story.append(Paragraph("Student Information", styles["Heading"]))
     story.append(_table([

@@ -6,7 +6,7 @@
     <div>
       <span class="eyebrow">Recommendation dashboard</span>
       <h1>{{ profile.full_name }}</h1>
-      <p>{{ profile.branch }}{% if profile.branch_2 %} / {{ profile.branch_2 }}{% endif %}{% if profile.branch_3 %} / {{ profile.branch_3 }}{% endif %} • {{ profile.percentile }} percentile • {{ profile.category }}</p>
+      <p>{{ profile.branches|join(" / ") }} • {{ profile.percentile }} percentile • {{ profile.category }}</p>
     </div>
     <div class="d-flex gap-3">
       <a class="btn btn-light" href="{{ url_for('download_report', report_id=report_id) }}"><i class="bi bi-download me-2"></i>Download Report</a>
@@ -36,7 +36,7 @@
             <li><span>Caste Category</span><b>{{ profile.category }}</b></li>
             <li><span>Gender</span><b>{{ profile.gender }}</b></li>
             <li><span>CET Score</span><b>{{ profile.percentile }} Percentile</b></li>
-            <li><span>Branch</span><b>{{ profile.branch }}{% if profile.branch_2 %} / {{ profile.branch_2 }}{% endif %}{% if profile.branch_3 %} / {{ profile.branch_3 }}{% endif %}</b></li>
+            <li><span>Branch</span><b>{{ profile.branches|join(" / ") }}</b></li>
           </ul>
         </div>
       </div>
