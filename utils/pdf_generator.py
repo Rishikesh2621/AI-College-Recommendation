@@ -67,25 +67,6 @@ def build_pdf_report(path: Path, profile: dict, recommendations: dict, counselin
                 story.append(Spacer(1, 0.05 * inch))
 
 
-    story.append(PageBreak())
-    story.append(Paragraph("Counseling Recommendation", styles["Heading"]))
-    skip_section = False
-    for line in counseling_markdown.splitlines():
-        cleaned = line.strip().replace("## ", "")
-        if line.startswith("## "):
-            if cleaned in ["Required Documents", "Future Career Scope"]:
-                skip_section = True
-            else:
-                skip_section = False
-        if skip_section:
-            continue
-        if not cleaned:
-            story.append(Spacer(1, 0.08 * inch))
-        elif line.startswith("## "):
-            story.append(Paragraph(cleaned, styles["Subheading"]))
-        else:
-            story.append(Paragraph(cleaned.replace("**", ""), styles["Body"]))
-
     story.append(Spacer(1, 0.4 * inch))
     sig_data = [
         ["_______________________", "", "_______________________"],
